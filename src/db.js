@@ -1,3 +1,5 @@
+
+
 var firebaseConfig = {
     apiKey: "AIzaSyDmUYkaxlgfvXP5RjCJbnT9YQUJ-_1jO-s",
     authDomain: "maskmap-26ab2.firebaseapp.com",
