@@ -1,52 +1,61 @@
 <template>
-  <div class="wrap" style="width:500px;margin:auto;background-color:cyan;padding:15px;box-shadow:0px 0px 6px 0px rgb(95, 100, 100)">
-    <div class="font">找口罩？MaskMap</div>
-    <div class="font">~歡迎預約~</div>
-    <form>
-      <div>
-        <label for="cityControlSelect">請選擇縣市</label>
-        <select class="form-select" id="cityControlSelect" v-model="selectCity.cityName">
-          <option selected>--請選擇縣市--</option>
-          <option v-for="(item,index) in county" :key="index" :value="item.CityName">{{ item.CityName }}</option>
-        </select>
-      </div>
-      <div v-if="selectCity.cityName">
-        <label for="areaFormControlSelect">請選擇區域</label>
-        <select class="form-select" id="areaFormControlSelect" v-model="selectCity.areaName" @change="updateSelect">
-          <option selected>--請選擇區域--</option>
-          <option v-for="(item,index) in county.find((item) => item.CityName === selectCity.cityName).AreaList" :key="index" >{{ item.AreaName }}</option>
-        </select>
-      </div>
-    </form>
-    <div class="search" v-if="this.selectCity.pharmacies.length">
-      共查詢到 {{ this.selectCity.pharmacies.length }} 間
-    </div>
-  </div>
-  <div class="list-group" style="width:500px;margin:20px auto auto auto;background-color:#f5f8f9;padding:15px;box-shadow:0px 0px 6px 0px rgb(160, 170, 170)"
-    v-if="selectCity.pharmacies.length">
-
-    <div class="itemStyle" v-for="(item,index) in selectCity.pharmacies" :key="index">
-      <div class="itemHeader"><i class="bi bi-caret-right-fill"></i>{{ item.properties.name }}</div>
-      <small>更新時間：{{ item.properties.updated }}</small>
-      <div class="itemFlex">
-        <div class="itemWrap-aldult">
-          <div class="itemFont"><i class="fas fa-male"></i>成人口罩</div>
-          <div class="itemFont">目前剩餘<span>{{ item.properties.mask_adult }}</span>個</div>
+  <div class="row no-gutters">
+      <div class="col-sm-3">
+        <div class="leftBox">
+          <div class="formBlock">
+            <div class="font">口罩地圖  Mask Map</div>
+            <div class="font">-找口罩/口罩預約-</div>
+            <form>
+              <div>
+                <label for="cityControlSelect">請選擇縣市</label>
+                <select class="form-select" id="cityControlSelect" v-model="selectCity.cityName">
+                  <option selected disabled>--請選擇縣市--</option>
+                  <option v-for="(item,index) in county" :key="index" :value="item.CityName">{{ item.CityName }}</option>
+                </select>
+              </div>
+              <div v-if="selectCity.cityName">
+                <label for="areaFormControlSelect">請選擇區域</label>
+                <select class="form-select" id="areaFormControlSelect" v-model="selectCity.areaName" @change="updateSelect">
+                  <option selected disabled>--請選擇區域--</option>
+                  <option v-for="(item,index) in county.find((item) => item.CityName === selectCity.cityName).AreaList" :key="index" >{{ item.AreaName }}</option>
+                </select>
+              </div>
+            </form>
+            <div class="search" v-if="this.selectCity.pharmacies.length">
+              共查詢到 {{ this.selectCity.pharmacies.length }} 間
+            </div>
+          </div>
+          <div class="list-group" style="background-color:#f5f8f9;padding:15px;"
+            v-if="selectCity.pharmacies.length">
+              <a href="#" class="itemStyle" v-for="(item,index) in selectCity.pharmacies" @click="foucsData(item)" :key="index">
+                <div class="itemHeader"><i class="bi bi-caret-right-fill"></i>{{ item.properties.name }}</div>
+                <small>更新時間：{{ item.properties.updated }}</small>
+                <div class="itemFlex">
+                  <div class="itemWrap-aldult">
+                    <div class="itemFont"><i class="fas fa-male"></i>成人口罩</div>
+                    <div class="itemFont">目前剩餘<span>{{ item.properties.mask_adult }}</span>個</div>
+                  </div>
+                  <div class="itemWrap-child">
+                    <div class="itemFont">兒童口罩</div>
+                    <div class="itemFont">目前剩餘<span>{{ item.properties.mask_child }}</span>個</div>
+                  </div>
+                </div>
+                <div class="itemAddress">地址：{{ item.properties.address }}</div>
+                <div class="itemPhone">電話：{{ item.properties.phone }}</div>
+                <div>
+                  <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalContent" aria-expanded="false" aria-controls="modalContent">預約</button>
+                  <a :href="`https://www.google.com.tw/maps/search/${item.properties.address}`" target="_blank"><button type="button" class="btn btn-info">查看位置</button></a>
+                </div>
+              </a>
+          </div>
         </div>
-        <div class="itemWrap-child">
-          <div class="itemFont">兒童口罩</div>
-          <div class="itemFont">目前剩餘<span>{{ item.properties.mask_child }}</span>個</div>
-        </div>
-      </div>
-      <div class="itemAddress">地址：{{ item.properties.address }}</div>
-      <div class="itemPhone">電話：{{ item.properties.phone }}</div>
-      <div>
-        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalContent" aria-expanded="false" aria-controls="modalContent">預約</button>
-        <a :href="`https://www.google.com.tw/maps/search/${item.properties.address}`" target="_blank"><button type="button" class="btn btn-info">查看位置</button></a>
-      </div>
-    </div>
 
+      </div>
+      <div class="col-sm-9 d-none d-sm-block">
+        <div id="myMap"></div>
+      </div>
   </div>
+
   <!-- 預約表單 -->
   <div class="modal fade" id="modalContent">
     <div class="modal-dialog">
@@ -93,6 +102,16 @@
 <script>
 const db = firebase.database();
 const rstRef = db.ref('results');
+let theMap = {};
+const markerIcon = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.5.1/dist/images/marker-icon.png',
+  shadowUrl:
+    'https://unpkg.com/leaflet@1.5.1/dist/images/marker-shadow.png',
+  iconSize: [32, 43],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
 
   export default {
     data() {
@@ -121,12 +140,17 @@ const rstRef = db.ref('results');
           }
         });
       },
+      foucsData(data){ //尚未修好
+        L.marker([this.selectCity.pharmacies[0].geometry.coordinates[1], this.selectCity.pharmacies[0].geometry.coordinates[0]], {icon: markerIcon}).addTo(theMap);
+        const lat = this.selectCity.pharmacies[0].geometry.coordinates[1];
+        const lng = this.selectCity.pharmacies[0].geometry.coordinates[0];
+        L.marker([lat, lng],{icon: markerIcon}).addTo(theMap);
+        theMap.panTo([lat,lng]);
+      },
       reserve(){
         if(!this.name.trim()){
           return;
         }
-        if(this.name==""){ console.log("123") }
-
         const key = rstRef.push().key;
         rstRef.child(key).set({  //db set
           date: this.date,
@@ -136,15 +160,13 @@ const rstRef = db.ref('results');
           number: this.number,
         })
         console.log("預約成功")
-        alert("已預約成功，可關閉視窗。")　//沒寫好ariaHidden，先暫時這樣
+        alert("已預約成功，可關閉視窗。") //hidden
         this.date = '';
         this.time = '';
         this.name = '';
         this.phone = '';
         this.number = '';
-        
       }
-      
     },
     mounted() {
       axios.get('https://raw.githubusercontent.com/donma/TaiwanAddressCityAreaRoadChineseEnglishJSON/master/CityCountyData.json').then((response) => {   //縣市、區域
@@ -155,6 +177,17 @@ const rstRef = db.ref('results');
         this.pharmacies = response.data.features;
         // console.log(this.pharmacies);
       })
+      // 創建地圖
+      const theMap = L.map("myMap", {
+        center: [24.8036, 120.9687],
+        zoom: 15
+      });
+      // 載入圖資
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        foo: 'bar',
+        attribution: 'map <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+        }).addTo(theMap);
+      //db
       rstRef.on('value',(snapshot) => {
         const data = snapshot.val();
         this.AppointmentList = data;
@@ -166,11 +199,33 @@ const rstRef = db.ref('results');
 
 
 <style>
+/* map */
+html,body {
+  padding: 0;
+  margin: 0;
+}
+#myMap {
+  height: 100vh;
+}
+/* 左欄位 */
+.leftBox{
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #f6f6f6;
+}
+.formBlock{
+  background-color:cyan;
+  border: 1px solid rgba(0,0,0,.125);
+  box-shadow: 0px 0px 9px rgb(100, 80, 80);
+  padding: 15px;
+  position: sticky;
+  top: 0;
+}
 .font{
   font-size: 24px;
   font-weight: bold;
   text-align: center;
-  color: rgb(130, 50, 145);
+  color: rgb(86, 32, 95);
 }
 .itemHeader{
   font-size: 24px;
@@ -182,6 +237,11 @@ const rstRef = db.ref('results');
   border: 1px solid rgba(0,0,0,.125);
   padding: 10px;
   margin-bottom: 15px;
+  text-decoration: none;
+  color: black;
+}
+.itemStyle:hover{
+  color: rgb(107, 105, 98);
 }
 .itemFlex{
   display: flex;
@@ -222,4 +282,16 @@ const rstRef = db.ref('results');
   padding: 20px;
   background-color: rgb(195, 225, 250);
 }
+.col-sm-9{
+  padding-left: 0;
+  padding-right: 0;
+}
+.col-sm-3{
+  padding-left: 0;
+  padding-right: 0;
+}
+.row{
+  --bs-gutter-x:0;
+}
+
 </style>
