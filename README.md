@@ -1,7 +1,19 @@
-# Vue 3 + Vite
+# MaskMap
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+> 查詢各縣市區域口罩剩餘數量資訊
+> 使用 Vue CLI 和 Leaflet + OpenStreetMap 來練習
 
-## Recommended IDE Setup
+## API
 
-- [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar)
+[CityCounty](https://raw.githubusercontent.com/donma/TaiwanAddressCityAreaRoadChineseEnglishJSON/master/CityCountyData.json)
+[Pharmacy](https://raw.githubusercontent.com/kiang/pharmacies/master/json/points.json)
+
+## Screenshot
+
+![](https://i.imgur.com/dJhQ4wV.jpg)
+
+## Use Modules
+* Vue CLI
+* Leaflet
+* Axios
+* Bootstrap
