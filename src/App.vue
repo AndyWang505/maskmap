@@ -166,7 +166,7 @@ export default {
   },
   mounted() {
     osmMap = L.map('map', {
-      center: [25.03, 121.55],
+      center: [121.6739, 24.91571],
       zoom: 15,
     });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
