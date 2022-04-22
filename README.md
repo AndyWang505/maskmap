@@ -14,7 +14,13 @@
 ![](https://i.imgur.com/dJhQ4wV.jpg)
 
 ## Use Modules
-* Vue CLI
 * Leaflet
 * Axios
 * Bootstrap
+
+## Other Skills
+* Vue CLI
+* OpenStreetMap
+* API
+* JavaScript ES6
+* CSS
